@@ -1,0 +1,192 @@
+# =============================================================
+# PersistentVolumes — todos pinados ao node worker (role=media)
+# Base path no host: /run/media/pedro/Nvme_1TB/pedroflix/
+# Disponível dentro do node como: /mnt/pedroflix/
+# =============================================================
+
+# --- Volume compartilhado de mídia (filmes + séries) ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-media
+spec:
+  capacity:
+    storage: 250Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/media
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+# --- Volume compartilhado de downloads ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-downloads
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/downloads
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+# --- Configs individuais de cada serviço ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-jellyfin
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/jellyfin
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-radarr
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/radarr
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-sonarr
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/sonarr
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-prowlarr
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/prowlarr
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-bazarr
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/bazarr
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-config-qbittorrent
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pedroflix-local
+  hostPath:
+    path: /mnt/pedroflix/config/qbittorrent
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - media

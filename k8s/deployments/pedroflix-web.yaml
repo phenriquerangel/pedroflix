@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pedroflix-web
+  namespace: pedroflix
+  labels:
+    app: pedroflix-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pedroflix-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: pedroflix-web
+    spec:
+      containers:
+        - name: pedroflix-web
+          image: pedroflix-web:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: RADARR_URL
+              value: "http://radarr.pedroflix.svc.cluster.local:7878"
+            - name: SONARR_URL
+              value: "http://sonarr.pedroflix.svc.cluster.local:8989"
+            - name: BAZARR_URL
+              value: "http://bazarr.pedroflix.svc.cluster.local:6767"
+            - name: RADARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pedroflix-web-secrets
+                  key: RADARR_KEY
+            - name: SONARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pedroflix-web-secrets
+                  key: SONARR_KEY
+            - name: BAZARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pedroflix-web-secrets
+                  key: BAZARR_KEY
+            - name: PROWLARR_URL
+              value: "http://prowlarr.pedroflix.svc.cluster.local:9696"
+            - name: PROWLARR_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pedroflix-web-secrets
+                  key: PROWLARR_KEY
+            - name: JELLYFIN_URL
+              value: "http://jellyfin.pedroflix.svc.cluster.local:8096"
+            - name: JELLYFIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pedroflix-web-secrets
+                  key: JELLYFIN_KEY
+            - name: QBITTORRENT_URL
+              value: "http://qbittorrent.pedroflix.svc.cluster.local:8080"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 30

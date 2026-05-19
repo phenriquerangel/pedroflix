@@ -1,0 +1,14 @@
+# Segredos locais — NÃO commitar
+secrets.local/
+*.local.yaml
+*.local.yml
+
+# Artefatos de build / runtime
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+*.pyc
+
+# Ferramentas
+.DS_Store

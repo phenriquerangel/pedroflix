@@ -1,0 +1,285 @@
+{
+  "title": "Pedroflix / Storage",
+  "uid": "pedroflix-storage",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "America/Sao_Paulo",
+  "tags": ["pedroflix", "storage"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "1TB — Usado / Total (minikube-m03)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "1 - (node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"} / node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"})",
+          "legendFormat": "1TB (m03)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Disco Raiz — Usado / Total",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "1 - (node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"} / node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"})",
+          "legendFormat": "Raiz (m03)"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "1TB — Espaço Livre",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 107374182400 },
+              { "color": "green", "value": 214748364800 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"}",
+          "legendFormat": "Livre"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "1TB — Espaço Total",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"}",
+          "legendFormat": "Total"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Raiz — Espaço Livre",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 21474836480 },
+              { "color": "green", "value": 53687091200 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"}",
+          "legendFormat": "Livre"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Raiz — Espaço Total",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"}",
+          "legendFormat": "Total"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Uso do 1TB ao longo do tempo",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"} - node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"}",
+          "legendFormat": "Usado (1TB)"
+        },
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/data\"}",
+          "legendFormat": "Livre (1TB)"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Uso do Disco Raiz ao longo do tempo",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_size_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"} - node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"}",
+          "legendFormat": "Usado (Raiz)"
+        },
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "node_filesystem_avail_bytes{instance=\"192.168.49.4:9100\", mountpoint=\"/usr/lib/modules\"}",
+          "legendFormat": "Livre (Raiz)"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Status dos PVCs",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 16 },
+      "options": { "sortBy": [{ "displayName": "Namespace", "desc": false }] },
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto" } },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Phase" },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "Bound": { "color": "green", "text": "Bound" } } },
+                  { "type": "value", "options": { "Pending": { "color": "yellow", "text": "Pending" } } },
+                  { "type": "value", "options": { "Lost": { "color": "red", "text": "Lost" } } }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        { "id": "labelsToFields", "options": { "mode": "columns" } },
+        { "id": "organize", "options": { "renameByName": { "namespace": "Namespace", "persistentvolumeclaim": "PVC", "phase": "Phase", "storageclass": "StorageClass", "Value": "Status" } } },
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["Namespace", "PVC", "Phase", "StorageClass"] } } }
+      ],
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "kube_persistentvolumeclaim_status_phase{phase=\"Bound\", namespace=~\"pedroflix|monitoring\"} == 1",
+          "legendFormat": "{{namespace}}/{{persistentvolumeclaim}} — {{phase}}",
+          "instant": true,
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Capacidade Solicitada por PVC",
+      "type": "bargauge",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 16 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 1073741824 },
+              { "color": "yellow", "value": 10737418240 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "uid": "prometheus" },
+          "expr": "kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace=~\"pedroflix|monitoring\"}",
+          "legendFormat": "{{namespace}}/{{persistentvolumeclaim}}"
+        }
+      ]
+    }
+  ]
+}

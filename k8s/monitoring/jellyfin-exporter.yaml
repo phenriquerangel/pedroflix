@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jellyfin-exporter
+  namespace: pedroflix
+type: Opaque
+stringData:
+  # Gerar em: Jellyfin → Dashboard → Admin → API Keys → + → copiar o token
+  api-key: "CHANGE_ME"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin-exporter
+  namespace: pedroflix
+  labels:
+    app: jellyfin-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin-exporter
+  template:
+    metadata:
+      labels:
+        app: jellyfin-exporter
+    spec:
+      nodeSelector:
+        role: monitoring
+      containers:
+        - name: exporter
+          image: jellyfin-exporter:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9594
+              name: metrics
+          args:
+            - "--collector.transcoding"
+            - "--collector.tasks"
+            - "--collector.storage"
+          env:
+            - name: JELLYFIN_ADDRESS
+              value: "http://jellyfin.pedroflix.svc.cluster.local:8096"
+            - name: JELLYFIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jellyfin-exporter
+                  key: api-key
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "20Mi"
+            limits:
+              cpu: "50m"
+              memory: "50Mi"
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9594
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-exporter
+  namespace: pedroflix
+  labels:
+    app: jellyfin-exporter
+spec:
+  selector:
+    app: jellyfin-exporter
+  ports:
+    - name: metrics
+      port: 9594
+      targetPort: 9594
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: jellyfin-exporter
+  namespace: pedroflix
+  labels:
+    release: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: jellyfin-exporter
+  namespaceSelector:
+    matchNames:
+      - pedroflix
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

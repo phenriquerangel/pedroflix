@@ -1,0 +1,114 @@
+## kube-prometheus-stack values — monitoring namespace, pinned to minikube-m02
+## Todos os dados persistem em /var/lib/monitoring/* (1TB ext4 via docker volume)
+
+## Scope: monitor only pedroflix namespace + cluster-level metrics
+## Node affinity: role=monitoring (minikube-m02)
+
+defaultRules:
+  create: true
+  rules:
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+
+## Prometheus
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      role: monitoring
+    tolerations: []
+    retention: 30d
+    retentionSize: "8GB"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "300Mi"
+      limits:
+        cpu: "500m"
+        memory: "700Mi"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: ""
+          volumeName: prometheus-pv
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    ## Coleta de todos os namespaces
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector:
+      matchLabels: {}
+    podMonitorNamespaceSelector:
+      matchLabels: {}
+    ruleNamespaceSelector:
+      matchLabels: {}
+    ## Scrape interval mais conservador para economizar recursos
+    scrapeInterval: "60s"
+    evaluationInterval: "60s"
+
+## Grafana
+grafana:
+  nodeSelector:
+    role: monitoring
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "200Mi"
+    limits:
+      cpu: "300m"
+      memory: "600Mi"
+  persistence:
+    enabled: true
+    storageClassName: ""
+    existingClaim: grafana-pvc
+    size: 2Gi
+  adminPassword: "CHANGE_ME"
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s"
+  ## Dashboards padrão incluídos
+  defaultDashboardsEnabled: true
+  defaultDashboardsTimezone: "America/Sao_Paulo"
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: monitoring
+    datasources:
+      enabled: true
+
+## Alertmanager — desabilitado para economizar recursos
+alertmanager:
+  enabled: false
+
+## kube-state-metrics — pinned to minikube-m02
+kube-state-metrics:
+  nodeSelector:
+    role: monitoring
+  resources:
+    requests:
+      cpu: "20m"
+      memory: "50Mi"
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
+
+## prometheus-node-exporter — DaemonSet (roda em todos os nodes, intencional)
+prometheusNodeExporter:
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "20Mi"
+    limits:
+      cpu: "50m"
+      memory: "64Mi"
+
+## Desabilita componentes que não existem no minikube
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false

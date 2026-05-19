@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cadvisor
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cadvisor
+rules:
+  - apiGroups: [""]
+    resources: [nodes, nodes/metrics, services, endpoints, pods]
+    verbs: [get, list, watch]
+  - nonResourceURLs: [/metrics]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cadvisor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cadvisor
+subjects:
+  - kind: ServiceAccount
+    name: cadvisor
+    namespace: monitoring
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cadvisor
+  namespace: monitoring
+  labels:
+    app: cadvisor
+spec:
+  selector:
+    matchLabels:
+      app: cadvisor
+  template:
+    metadata:
+      labels:
+        app: cadvisor
+    spec:
+      serviceAccountName: cadvisor
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: dedicated
+          operator: Equal
+          value: media
+          effect: NoSchedule
+      containers:
+        - name: cadvisor
+          image: gcr.io/cadvisor/cadvisor:v0.51.0
+          args:
+            - --housekeeping_interval=10s
+            - --max_housekeeping_interval=15s
+            - --event_storage_event_limit=default=0
+            - --event_storage_age_limit=default=0
+            - --store_container_labels=false
+            - --whitelisted_container_labels=io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid
+            - --containerd=/run/containerd/containerd.sock
+            - --containerd-namespace=k8s.io
+            - --port=8088
+          ports:
+            - containerPort: 8088
+              name: http
+          resources:
+            requests:
+              cpu: "30m"
+              memory: "50Mi"
+            limits:
+              cpu: "200m"
+              memory: "200Mi"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: rootfs
+              mountPath: /rootfs
+              readOnly: true
+            - name: var-run
+              mountPath: /var/run
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+            - name: containerd-sock
+              mountPath: /run/containerd/containerd.sock
+            - name: disk
+              mountPath: /dev/disk
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: rootfs
+          hostPath:
+            path: /
+        - name: var-run
+          hostPath:
+            path: /var/run
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: containerd-sock
+          hostPath:
+            path: /run/containerd/containerd.sock
+        - name: disk
+          hostPath:
+            path: /dev/disk
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cadvisor
+  namespace: monitoring
+  labels:
+    app: cadvisor
+spec:
+  selector:
+    app: cadvisor
+  clusterIP: None
+  ports:
+    - name: http
+      port: 8088
+      targetPort: 8088
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cadvisor
+  namespace: monitoring
+  labels:
+    release: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: cadvisor
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      honorLabels: true
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - action: replace
+          targetLabel: job
+          replacement: cadvisor
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          action: drop
+          regex: "container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)"
+        - sourceLabels: [__name__]
+          action: drop
+          regex: "container_fs_(io_current|io_time_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)"
+        - sourceLabels: [__name__]
+          action: drop
+          regex: "container_spec.*"
+        - sourceLabels: [container]
+          action: drop
+          regex: "POD"
+        - sourceLabels: [container]
+          action: drop
+          regex: "^$"

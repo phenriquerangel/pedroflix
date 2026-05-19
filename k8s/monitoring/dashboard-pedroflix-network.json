@@ -1,0 +1,290 @@
+{
+  "title": "Pedroflix / Network",
+  "uid": "pedroflix-network",
+  "schemaVersion": 37,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "America/Sao_Paulo",
+  "tags": [
+    "pedroflix",
+    "network"
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "\ud83d\udce1  Por Servi\u00e7o (pedroflix)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "title": "Upload por servi\u00e7o \u2b06 (bytes enviados)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(pod_network_transmit_bytes_total{namespace=\"pedroflix\"}[2m])",
+          "legendFormat": "{{ pod }}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Download por servi\u00e7o \u2b07 (bytes recebidos)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          }
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(pod_network_receive_bytes_total{namespace=\"pedroflix\"}[2m])",
+          "legendFormat": "{{ pod }}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Top Upload \u2014 Total acumulado por servi\u00e7o",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 104857600
+              },
+              {
+                "color": "red",
+                "value": 1073741824
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "topk(10, pod_network_transmit_bytes_total{namespace=\"pedroflix\"})",
+          "legendFormat": "{{ pod }}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Top Download \u2014 Total acumulado por servi\u00e7o",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 104857600
+              },
+              {
+                "color": "red",
+                "value": 1073741824
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "topk(10, pod_network_receive_bytes_total{namespace=\"pedroflix\"})",
+          "legendFormat": "{{ pod }}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "\ud83d\udda5\ufe0f  Por Node (tr\u00e1fego externo eth0)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "collapsed": false
+    },
+    {
+      "id": 7,
+      "title": "m03 \u2014 Media Services (Upload = Jellyfin stream + seed)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.49.4:9100\", device=\"eth0\"}[2m])",
+          "legendFormat": "\u2b07 download (torrents / API)"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.49.4:9100\", device=\"eth0\"}[2m])",
+          "legendFormat": "\u2b06 upload (Jellyfin stream / seed)"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "m02 \u2014 Web Interface",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 12
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_network_receive_bytes_total{instance=\"192.168.49.3:9100\", device=\"eth0\"}[2m])",
+          "legendFormat": "\u2b07 download"
+        },
+        {
+          "datasource": {
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_network_transmit_bytes_total{instance=\"192.168.49.3:9100\", device=\"eth0\"}[2m])",
+          "legendFormat": "\u2b06 upload"
+        }
+      ]
+    }
+  ]
+}

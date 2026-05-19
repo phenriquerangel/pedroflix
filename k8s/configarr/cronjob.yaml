@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: configarr
+  namespace: pedroflix
+spec:
+  schedule: "0 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: configarr
+              image: ghcr.io/raydak-labs/configarr:latest
+              volumeMounts:
+                - name: config
+                  mountPath: /app/config/config.yml
+                  subPath: config.yml
+                - name: secrets
+                  mountPath: /app/config/secrets.yml
+                  subPath: secrets.yml
+          volumes:
+            - name: config
+              configMap:
+                name: configarr-config
+            - name: secrets
+              secret:
+                secretName: configarr-secrets
