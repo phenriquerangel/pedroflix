@@ -8,6 +8,31 @@ data:
     trashGuideUrl: https://github.com/TRaSH-Guides/Guides
     recyclarrConfigUrl: https://github.com/recyclarr/config-templates
 
+    customFormatDefinitions:
+      - trash_id: language-prefer-portuguese
+        trash_description: "Language: Prefer Portuguese"
+        name: "Language: Prefer Portuguese"
+        includeCustomFormatWhenRenaming: false
+        specifications:
+          - name: Portuguese
+            implementation: LanguageSpecification
+            negate: false
+            required: false
+            fields:
+              value: 18
+          - name: Portuguese Brazil
+            implementation: LanguageSpecification
+            negate: false
+            required: false
+            fields:
+              value: 33
+          - name: Release Title Portuguese
+            implementation: ReleaseTitleSpecification
+            negate: false
+            required: false
+            fields:
+              value: "(?i)\\b(pt[-_]br|ptbr|dublado|dual[-_]audio|multi[-_]audio|portugues|portuguese)\\b"
+
     sonarr:
       main:
         base_url: http://sonarr.pedroflix.svc.cluster.local:8989
@@ -18,6 +43,13 @@ data:
           - template: sonarr-v4-quality-profile-web-1080p
           - template: sonarr-v4-custom-formats-web-1080p
 
+        custom_formats:
+          - trash_ids:
+              - language-prefer-portuguese
+            assign_scores_to:
+              - name: WEB-1080p
+                score: 1000
+
     radarr:
       main:
         base_url: http://radarr.pedroflix.svc.cluster.local:7878
@@ -27,3 +59,10 @@ data:
           - template: radarr-quality-definition-movie
           - template: radarr-quality-profile-hd-bluray-web
           - template: radarr-custom-formats-hd-bluray-web
+
+        custom_formats:
+          - trash_ids:
+              - language-prefer-portuguese
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: 1000
