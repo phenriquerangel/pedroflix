@@ -47,6 +47,18 @@ data:
           - trash_ids:
               - language-prefer-portuguese
             assign_scores_to:
+              - name: Any
+                score: 1000
+              - name: SD
+                score: 1000
+              - name: HD-720p
+                score: 1000
+              - name: HD-1080p
+                score: 1000
+              - name: Ultra-HD
+                score: 1000
+              - name: HD - 720p/1080p
+                score: 1000
               - name: WEB-1080p
                 score: 1000
 
@@ -64,5 +76,17 @@ data:
           - trash_ids:
               - language-prefer-portuguese
             assign_scores_to:
+              - name: Any
+                score: 1000
+              - name: SD
+                score: 1000
+              - name: HD-720p
+                score: 1000
+              - name: HD-1080p
+                score: 1000
+              - name: Ultra-HD
+                score: 1000
+              - name: HD - 720p/1080p
+                score: 1000
               - name: HD Bluray + WEB
                 score: 1000
