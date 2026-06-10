@@ -9,7 +9,10 @@ $action = New-ScheduledTaskAction `
     -Execute    'powershell.exe' `
     -Argument   "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`""
 
-$trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+$triggers = @(
+    (New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME),
+    (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5))
+)
 
 $settings = New-ScheduledTaskSettingsSet `
     -ExecutionTimeLimit  (New-TimeSpan -Hours 0) `
@@ -28,7 +31,7 @@ Register-ScheduledTask `
     -TaskName   $taskName `
     -TaskPath   $taskPath `
     -Action     $action `
-    -Trigger    $trigger `
+    -Trigger    $triggers `
     -Settings   $settings `
     -Principal  $principal `
     -Description 'Expõe serviços Kubernetes do pedroflix na rede local (port-forward)' `
